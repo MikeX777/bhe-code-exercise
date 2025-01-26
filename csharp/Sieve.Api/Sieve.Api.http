@@ -1,0 +1,6 @@
+@Sieve.Api_HostAddress = http://localhost:5161
+
+GET {{Sieve.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
