@@ -15,7 +15,7 @@ public class SieveImplementation : ISieve
     private List<List<long>> PrimeFactors = new List<List<long>> { new List<long> { 2 } };
     private HashSet<long> PrimeFactorsSet = new HashSet<long> { 2 };
 
-    public long NthPrime(long n)
+    public long NthPrime2(long n)
     {
         if (PrimeFactors.Count > n)
         {
@@ -32,19 +32,23 @@ public class SieveImplementation : ISieve
                         continue;
                     }
                     //var maxCheck = Math.Sqrt(x);
-                    for (var i = 0; i < PrimeFactors.Count; i++)
+                    var sync = new object();
+                    Parallel.For(0, PrimeFactors.Count, i =>
                     {
                         var currentMax = PrimeFactors[i][PrimeFactors[i].Count - 1];
                         while (currentMax <= x)
                         {
                             currentMax = PrimeFactors[i][PrimeFactors[i].Count - 1] + PrimeFactors[i][0];
-                            if (!PrimeFactorsSet.Contains(currentMax))
+                            lock (sync)
                             {
-                                PrimeFactorsSet.Add(currentMax);
+                                if (!PrimeFactorsSet.Contains(currentMax))
+                                {
+                                    PrimeFactorsSet.Add(currentMax);
+                                }
+                                PrimeFactors[i].Add(currentMax);
                             }
-                            PrimeFactors[i].Add(currentMax);
                         }
-                    }
+                    });
                     if (!PrimeFactorsSet.Contains(x))
                     {
                         PrimeFactorsSet.Add(x);
@@ -58,7 +62,7 @@ public class SieveImplementation : ISieve
     }
 
 
-    public long NthPrime2(long n)
+    public long NthPrime(long n)
     {
         if (primes.Count > n)
         {
