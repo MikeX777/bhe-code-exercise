@@ -32,10 +32,13 @@
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sieve.Model\Sieve.Model.csproj" />
+    <ProjectReference Include="..\Sieve.Service\Sieve.Service.csproj" />
+    <ProjectReference Include="..\Sieve\Sieve.csproj" />
   </ItemGroup>
 
 </Project>

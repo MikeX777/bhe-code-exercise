@@ -1,11 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using Sieve.Interfaces;
 
 namespace Sieve;
-
-public interface ISieve
-{
-    long NthPrime(long n);
-}
 
 public class SieveImplementation : ISieve
 {

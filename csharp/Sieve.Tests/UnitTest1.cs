@@ -1,3 +1,5 @@
+using Sieve.Interfaces;
+
 namespace Sieve.Tests
 
 {

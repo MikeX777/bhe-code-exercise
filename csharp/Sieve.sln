@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sieve.Api", "Sieve.Api\Siev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sieve.Model", "Sieve.Model\Sieve.Model.csproj", "{43BC7975-8883-41F8-B466-51CD565AE6B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sieve.Interfaces", "Sieve.Interfaces\Sieve.Interfaces.csproj", "{C5BB603E-FA68-4759-BD4D-470111B846EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sieve.Service", "Sieve.Service\Sieve.Service.csproj", "{055B03FD-362B-4066-B03E-7208A6FC2808}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{43BC7975-8883-41F8-B466-51CD565AE6B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43BC7975-8883-41F8-B466-51CD565AE6B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43BC7975-8883-41F8-B466-51CD565AE6B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5BB603E-FA68-4759-BD4D-470111B846EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5BB603E-FA68-4759-BD4D-470111B846EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5BB603E-FA68-4759-BD4D-470111B846EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5BB603E-FA68-4759-BD4D-470111B846EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{055B03FD-362B-4066-B03E-7208A6FC2808}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{055B03FD-362B-4066-B03E-7208A6FC2808}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{055B03FD-362B-4066-B03E-7208A6FC2808}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{055B03FD-362B-4066-B03E-7208A6FC2808}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

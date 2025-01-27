@@ -7,10 +7,15 @@ using FluentValidation.AspNetCore;
 using Hellang.Middleware.ProblemDetails;
 using Serilog;
 using Serilog.Events;
+using Sieve;
 using Sieve.Api.Configuration;
+using Sieve.Api.Controllers.V1;
 using Sieve.Api.Exceptions;
+using Sieve.Api.Middleware;
+using Sieve.Interfaces;
 using Sieve.Model;
 using Sieve.Model.Api;
+using Sieve.Service.V1;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Data;
 using System.Reflection;
@@ -43,10 +48,11 @@ builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose:
 builder.Logging.AddSerilog();
 
 builder.Services.AddLazyCache();
-//builder.Services.AddMediatR(cfg =>
-//{
-//    // TODO: Add configuration
-//});
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblies([typeof(ValidationBehavior<,>).Assembly, typeof(SieveHandler).Assembly,]);
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson()
@@ -161,6 +167,7 @@ void ConfigureContainer(ContainerBuilder containerBuilder)
 {
     containerBuilder.RegisterInstance(application);
     containerBuilder.RegisterInstance(Log.Logger);
+    containerBuilder.Register<ISieve>((_, _) => new SieveImplementation());
 }
 
 /// <summary>
