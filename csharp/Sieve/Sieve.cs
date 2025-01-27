@@ -8,7 +8,7 @@ public class SieveImplementation : ISieve
     {
         if (n < 0)
         {
-            return -1L;
+            throw new ArgumentException("Negative Indexed Prime Numbers are not Allowed.");
         }
         if (n == 0)
         {
@@ -19,6 +19,12 @@ public class SieveImplementation : ISieve
         // be the prime, and then the square root of that is taken for the stopping point of primes
         // to check. 15% is added on top just to overshoot.
         var upperBound = (long)Math.Ceiling(n * (Math.Log(n) + Math.Log(Math.Log(n))) * 1.15);
+        // This is done to ensure that at small values of n, the upperbound is still large enough
+        // to generate enough primes.
+        if (n < 6)
+        {
+            upperBound = 100;
+        }
         var limit = (int)(Math.Sqrt(upperBound) + 1);
 
         // This function builds the prime factors we should expect up to theoretical limit.

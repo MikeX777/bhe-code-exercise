@@ -11,6 +11,8 @@ namespace Sieve.Tests
         {
             ISieve sieve = new SieveImplementation();
             Assert.AreEqual(2, sieve.NthPrime(0));
+            Assert.AreEqual(3, sieve.NthPrime(1));
+            Assert.AreEqual(5, sieve.NthPrime(2));
             Assert.AreEqual(71, sieve.NthPrime(19));
             Assert.AreEqual(541, sieve.NthPrime(99));
             Assert.AreEqual(3581, sieve.NthPrime(500));

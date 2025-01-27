@@ -9,12 +9,12 @@ using Serilog;
 using Serilog.Events;
 using Sieve;
 using Sieve.Api.Configuration;
-using Sieve.Api.Controllers.V1;
 using Sieve.Api.Exceptions;
 using Sieve.Api.Middleware;
 using Sieve.Interfaces;
 using Sieve.Model;
 using Sieve.Model.Api;
+using Sieve.Model.Api.Requests;
 using Sieve.Service.V1;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Data;
@@ -62,7 +62,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
-builder.Services.AddValidatorsFromAssemblies([Assembly.GetExecutingAssembly(),]);
+builder.Services.AddValidatorsFromAssemblies([Assembly.GetExecutingAssembly(), typeof(PrimeCommand).Assembly]);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApiVersioning(
     options =>

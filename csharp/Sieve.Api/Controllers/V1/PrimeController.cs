@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Api.Abstractions;
 using Sieve.Model.Api;
-using Sieve.Service.V1;
+using Sieve.Model.Api.Requests;
 using Swashbuckle.AspNetCore.Annotations;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
@@ -31,10 +31,15 @@ namespace Sieve.Api.Controllers.V1
     {
         private readonly IMediator mediator = mediator;
 
+        /// <summary>
+        /// An endpoint to get the Nth prime number.
+        /// </summary>
+        /// <param name="n">The nth index to find the prime number for.</param>
+        /// <returns>The value of the nth prime number.</returns>
         [HttpGet("nth/{n}")]
         [SwaggerOperation("An action used to retrieve the nth prime number.")]
         [ProducesResponseType(Status200OK, Type = typeof(long))]
         public async Task<IActionResult> GetNthPrimeAction(long n) =>
-            Respond(await mediator.Send(new GetNthPrime(n)));
+            Respond(await mediator.Send(new PrimeCommand { N = n }));
     }
 }
