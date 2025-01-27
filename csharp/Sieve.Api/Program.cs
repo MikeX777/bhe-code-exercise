@@ -1,11 +1,18 @@
 using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hellang.Middleware.ProblemDetails;
 using Serilog;
 using Serilog.Events;
 using Sieve.Api.Configuration;
+using Sieve.Api.Exceptions;
 using Sieve.Model;
 using Sieve.Model.Api;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Data;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using static LanguageExt.Prelude;
@@ -36,10 +43,10 @@ builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose:
 builder.Logging.AddSerilog();
 
 builder.Services.AddLazyCache();
-builder.Services.AddMediatR(cfg =>
-{
-    // TODO: Add configuration
-});
+//builder.Services.AddMediatR(cfg =>
+//{
+//    // TODO: Add configuration
+//});
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson()
@@ -97,29 +104,64 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddProblemDetails(options => ConfigureProblemDetails(options, application.Name, builder.Environment.EnvironmentName, Log.Logger, ErrorSource.SieveApi));
 
-// Add services to the container.
+builder.Services.AddSwaggerGen(c =>
+{
+    c.CustomOperationIds(apiDesc => { return apiDesc.TryGetMethodInfo(out var methodInfo) ? methodInfo.Name : null; });
+    c.UseAllOfToExtendReferenceSchemas();
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name!}.xml";
+    var filePath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(filePath);
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    c.CustomSchemaIds(x => x.FullName);
+});
+
+
+// Add host services.
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+builder.Host.ConfigureContainer<ContainerBuilder>(ConfigureContainer);
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging();
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+    app.UseCors("AllowAll");
+}
+else
+{
+    app.UseExceptionHandler("/error");
+    app.UseCors("default");
 }
 
+var provider = app.Services.GetService<IApiVersionDescriptionProvider>();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    if (provider != null)
+    {
+        foreach (var groupName in provider.ApiVersionDescriptions.Select(description => description.GroupName))
+            c.SwaggerEndpoint($"/swagger/{groupName}/swagger.json", groupName.ToUpperInvariant());
+    }
+});
+
+app.UseProblemDetails();
+app.Use(CustomMiddleware);
+app.UseAuthentication();
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
+
+void ConfigureContainer(ContainerBuilder containerBuilder)
+{
+    containerBuilder.RegisterInstance(application);
+    containerBuilder.RegisterInstance(Log.Logger);
+}
 
 /// <summary>
 /// Added functionality for the Program class.
@@ -133,6 +175,14 @@ public partial class Program
     /// <returns>A <see cref="LogEventLevel"/>.</returns>
     static LogEventLevel Level(string value) => parseEnum<LogEventLevel>(value).IfNone(LogEventLevel.Error);
 
+    /// <summary>
+    /// A method used to configure the problem details for the API.
+    /// </summary>
+    /// <param name="options">The options instance used to handle the controls.</param>
+    /// <param name="applicationName">The name of the application.</param>
+    /// <param name="environmentName">The environment the application is running in.</param>
+    /// <param name="logger">The logger in use.</param>
+    /// <param name="source">The source of the error.</param>
     static void ConfigureProblemDetails(Hellang.Middleware.ProblemDetails.ProblemDetailsOptions options,
         string applicationName,
         string environmentName,
@@ -152,6 +202,38 @@ public partial class Program
         options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);
         options.MapToStatusCode<HttpRequestException>(StatusCodes.Status503ServiceUnavailable);
         options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+    }
+
+    /// <summary>
+    /// Custom middleware to handle errors.
+    /// </summary>
+    /// <param name="context">The HttpContext.</param>
+    /// <param name="next">The next middleware in the pipeline.</param>
+    /// <returns>A Task.</returns>
+    /// <exception cref="MiddlewareException">An exception that is thrown from this middleware if an error endpoint is browsed to.</exception>
+    static Task CustomMiddleware(HttpContext context, Func<Task> next)
+    {
+        if (context.Request.Path.StartsWithSegments("/middleware", out _, out var remaining))
+        {
+            if (remaining.StartsWithSegments("/error"))
+            {
+                throw new MiddlewareException("This is an exception thrown from middleware.");
+            }
+
+            if (remaining.StartsWithSegments("/status", out _, out remaining))
+            {
+                var statusCodeString = remaining.Value?.Trim('/');
+
+                if (int.TryParse(statusCodeString, out var statusCode))
+                {
+                    context.Response.StatusCode = statusCode;
+                    return Task.CompletedTask;
+                }
+
+            }
+        }
+
+        return next();
     }
 }
 
