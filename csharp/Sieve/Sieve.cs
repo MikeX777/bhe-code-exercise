@@ -21,9 +21,9 @@ public class SieveImplementation : ISieve
         var upperBound = (long)Math.Ceiling(n * (Math.Log(n) + Math.Log(Math.Log(n))) * 1.15);
         // This is done to ensure that at small values of n, the upperbound is still large enough
         // to generate enough primes.
-        if (n < 6)
+        if (n < 7)
         {
-            upperBound = 100;
+            upperBound = 400;
         }
         var limit = (int)(Math.Sqrt(upperBound) + 1);
 
